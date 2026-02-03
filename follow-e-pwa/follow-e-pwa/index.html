@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Follow-E">
+    <meta name="description" content="Akıllı harcama ve ödeme takip uygulaması. Faturalarınızı, aboneliklerinizi ve ödemelerinizi kolayca takip edin.">
+    <meta name="keywords" content="harcama takip, ödeme hatırlatıcı, fatura takip, abonelik yönetimi, bütçe">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Follow-E | Expense Tracker">
+    <meta property="og:description" content="Akıllı harcama ve ödeme takip uygulaması">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="icons/icon-512.png">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <title>Follow-E | Expense Tracker</title>
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">💰</div>
+                <div class="logo-text">
+                    <span class="logo-title">Follow-E</span>
+                    <span class="logo-subtitle">Expense Tracker</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <span class="icon-moon">🌙</span>
+                    <span class="icon-sun">☀️</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== STATS SECTION ===== -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-label">Aktif</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value" id="statMonthly">0</div>
+                <div class="stat-label">Bu Ay</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💵</div>
+                <div class="stat-value" id="statTotal">₺0</div>
+                <div class="stat-label">Toplam</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ADVICE SECTION ===== -->
+    <section class="advice-section">
+        <div class="advice-card" id="adviceCard">
+            <div class="advice-icon">💡</div>
+            <div class="advice-content">
+                <h4 id="adviceTitle">Hoş Geldiniz!</h4>
+                <p id="adviceText">İlk harcamanızı ekleyerek başlayın ve ödemelerinizi asla kaçırmayın.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TABS ===== -->
+    <section class="tabs-section">
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="list">
+                    <span class="tab-icon">📋</span>
+                    <span>Harcamalar</span>
+                </button>
+                <button class="tab-btn" data-tab="add">
+                    <span class="tab-icon">➕</span>
+                    <span>Yeni Ekle</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LIST TAB ===== -->
+    <div class="tab-content active" id="listTab">
+        <section class="list-section">
+            <div class="list-container">
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">Tümü</button>
+                    <button class="filter-btn" data-filter="active">Aktif</button>
+                    <button class="filter-btn" data-filter="inactive">Pasif</button>
+                    <button class="filter-btn" data-filter="fatura">Faturalar</button>
+                    <button class="filter-btn" data-filter="abonelik">Abonelikler</button>
+                    <button class="filter-btn" data-filter="kredi">Krediler</button>
+                </div>
+                
+                <!-- Expense List -->
+                <div class="expense-list" id="expenseList">
+                    <!-- Cards will be rendered here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <h3>Henüz harcama yok</h3>
+                    <p>İlk harcamanızı ekleyerek takibe başlayın!</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== ADD TAB ===== -->
+    <div class="tab-content" id="addTab">
+        <section class="form-section">
+            <div class="form-container">
+                <form class="expense-form" id="expenseForm">
+                    <div class="form-header">
+                        <h3>💳 Yeni Harcama</h3>
+                        <p>Ödeme detaylarını girin</p>
+                    </div>
+                    
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label" for="title">
+                            Başlık <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="title" name="title" 
+                               placeholder="örn: Elektrik Faturası" required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label" for="description">Açıklama</label>
+                        <textarea class="form-textarea" id="description" name="description" 
+                                  placeholder="Ek notlar..."></textarea>
+                    </div>
+                    
+                    <!-- Amount & Category -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="amount">
+                                Tutar (₺) <span class="required">*</span>
+                            </label>
+                            <input type="number" class="form-input" id="amount" name="amount" 
+                                   placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="category">Kategori</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="fatura">📄 Fatura</option>
+                                <option value="abonelik">📱 Abonelik</option>
+                                <option value="kredi">🏦 Kredi</option>
+                                <option value="kira">🏠 Kira</option>
+                                <option value="sigorta">🛡️ Sigorta</option>
+                                <option value="diger">📦 Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Date & Time -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="date">
+                                Tarih <span class="required">*</span>
+                            </label>
+                            <input type="date" class="form-input" id="date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="time">
+                                Saat <span class="required">*</span>
+                            </label>
+                            <input type="time" class="form-input" id="time" name="time" value="09:00" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Extra Times -->
+                    <div class="extra-times-section">
+                        <div class="extra-times-header">
+                            <span>Ek hatırlatma saatleri</span>
+                            <button type="button" class="add-time-btn" id="addTimeBtn">+ Saat Ekle</button>
+                        </div>
+                        <div class="extra-times-list" id="extraTimesList"></div>
+                    </div>
+                    
+                    <!-- Repeat Type -->
+                    <div class="form-group">
+                        <label class="form-label" for="repeatType">Tekrar</label>
+                        <select class="form-select" id="repeatType" name="repeatType">
+                            <option value="once">🔸 Tek Seferlik</option>
+                            <option value="daily">📆 Her Gün</option>
+                            <option value="weekly">📅 Her Hafta</option>
+                            <option value="biweekly">📅 2 Haftada Bir</option>
+                            <option value="triweekly">📅 3 Haftada Bir</option>
+                            <option value="monthly" selected>🗓️ Her Ay</option>
+                            <option value="quarterly">🗓️ 3 Ayda Bir</option>
+                            <option value="biannual">🗓️ 6 Ayda Bir</option>
+                            <option value="yearly">📆 Her Yıl</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Priority -->
+                    <div class="form-group">
+                        <label class="form-label">Öncelik</label>
+                        <div class="priority-selector">
+                            <div class="priority-option low">
+                                <input type="radio" name="priority" id="priorityLow" value="low">
+                                <label for="priorityLow">
+                                    <span class="priority-icon">🟢</span>
+                                    <span class="priority-text">Düşük</span>
+                                </label>
+                            </div>
+                            <div class="priority-option medium">
+                                <input type="radio" name="priority" id="priorityMedium" value="medium" checked>
+                                <label for="priorityMedium">
+                                    <span class="priority-icon">🟡</span>
+                                    <span class="priority-text">Orta</span>
+                                </label>
+                            </div>
+                            <div class="priority-option high">
+                                <input type="radio" name="priority" id="priorityHigh" value="high">
+                                <label for="priorityHigh">
+                                    <span class="priority-icon">🔴</span>
+                                    <span class="priority-text">Yüksek</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit -->
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-icon">💾</span>
+                        <span>Harcamayı Kaydet</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+    
+    <!-- Notification Permission Modal -->
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Bildirimler</h3>
+                <button class="modal-close" id="notificationModalClose">✕</button>
+            </div>
+            <div class="modal-body notification-modal-content">
+                <div class="notification-icon">🔔</div>
+                <h3>Bildirimleri Açın</h3>
+                <p>Ödemelerinizi kaçırmamak için bildirimlere izin verin.</p>
+                <ul class="notification-features">
+                    <li>Ödeme tarihi yaklaştığında uyarı</li>
+                    <li>Belirlediğiniz saatte hatırlatma</li>
+                    <li>Önemli ödemeler için öncelikli bildirim</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="notificationLater">Daha Sonra</button>
+                <button class="modal-btn primary" id="notificationAllow">İzin Ver</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Silme Onayı</h3>
+                <button class="modal-close" id="deleteModalClose">✕</button>
+            </div>
+            <div class="modal-body delete-confirm">
+                <div class="delete-icon">🗑️</div>
+                <p><strong id="deleteItemTitle"></strong> silinecek.</p>
+                <p>Bu işlem geri alınamaz.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="deleteCancel">İptal</button>
+                <button class="modal-btn danger" id="deleteConfirm">Sil</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Harcamayı Düzenle</h3>
+                <button class="modal-close" id="editModalClose">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editTitle">Başlık</label>
+                        <input type="text" class="form-input" id="editTitle" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editDescription">Açıklama</label>
+                        <textarea class="form-textarea" id="editDescription"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editAmount">Tutar (₺)</label>
+                            <input type="number" class="form-input" id="editAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editCategory">Kategori</label>
+                            <select class="form-select" id="editCategory">
+                                <option value="fatura">📄 Fatura</option>
+                                <option value="abonelik">📱 Abonelik</option>
+                                <option value="kredi">🏦 Kredi</option>
+                                <option value="kira">🏠 Kira</option>
+                                <option value="sigorta">🛡️ Sigorta</option>
+                                <option value="diger">📦 Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editDate">Tarih</label>
+                            <input type="date" class="form-input" id="editDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editTime">Saat</label>
+                            <input type="time" class="form-input" id="editTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editRepeatType">Tekrar</label>
+                        <select class="form-select" id="editRepeatType">
+                            <option value="once">🔸 Tek Seferlik</option>
+                            <option value="daily">📆 Her Gün</option>
+                            <option value="weekly">📅 Her Hafta</option>
+                            <option value="biweekly">📅 2 Haftada Bir</option>
+                            <option value="triweekly">📅 3 Haftada Bir</option>
+                            <option value="monthly">🗓️ Her Ay</option>
+                            <option value="quarterly">🗓️ 3 Ayda Bir</option>
+                            <option value="biannual">🗓️ 6 Ayda Bir</option>
+                            <option value="yearly">📆 Her Yıl</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Öncelik</label>
+                        <div class="priority-selector">
+                            <div class="priority-option low">
+                                <input type="radio" name="editPriority" id="editPriorityLow" value="low">
+                                <label for="editPriorityLow">
+                                    <span class="priority-icon">🟢</span>
+                                    <span class="priority-text">Düşük</span>
+                                </label>
+                            </div>
+                            <div class="priority-option medium">
+                                <input type="radio" name="editPriority" id="editPriorityMedium" value="medium">
+                                <label for="editPriorityMedium">
+                                    <span class="priority-icon">🟡</span>
+                                    <span class="priority-text">Orta</span>
+                                </label>
+                            </div>
+                            <div class="priority-option high">
+                                <input type="radio" name="editPriority" id="editPriorityHigh" value="high">
+                                <label for="editPriorityHigh">
+                                    <span class="priority-icon">🔴</span>
+                                    <span class="priority-text">Yüksek</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="editCancel">İptal</button>
+                <button class="modal-btn primary" id="editSave">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PWA INSTALL BANNER ===== -->
+    <div class="pwa-banner" id="pwaBanner">
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-icon">📱</div>
+            <div class="pwa-banner-text">
+                <h4>Follow-E'yi Yükle</h4>
+                <p>Ana ekrana ekleyerek daha hızlı erişin</p>
+            </div>
+            <div class="pwa-banner-actions">
+                <button class="pwa-install-btn" id="pwaInstallBtn">Yükle</button>
+                <button class="pwa-dismiss-btn" id="pwaDismissBtn">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="app.js"></script>
+</body>
+</html>
